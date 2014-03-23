@@ -54,7 +54,7 @@
 
       // Example 1 - Fetch template from external file and use embedded data.
 
-      minitemp.render ('template.ejs', data, function (err, html)
+      minitemp.renderFile ('template.ejs', data, function (err, html)
       {
         if (err)
           throw err;
@@ -70,7 +70,7 @@
           items: JSON.parse (data2)
         };
         var template = $$ ('#demo').innerHTML;
-        $$ ('#result2').innerHTML = minitemp.renderString (template, myData);
+        $$ ('#result2').innerHTML = minitemp.render (template, myData);
       });
 
       // Example 3 - Fetch data and template from external files.
@@ -81,7 +81,7 @@
           ord:   3,
           items: JSON.parse (data3)
         };
-        minitemp.render ('template.ejs', myData, function (err, html)
+        minitemp.renderFile ('template.ejs', myData, function (err, html)
         {
           if (err)
             throw err;

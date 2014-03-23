@@ -43,6 +43,13 @@
  * @param {Object.<string,boolean>} map A map of strings to boolean values.
  * @param {string=} sep List items separator; defaults to a space.
  */
+/**
+ * @name sprintf
+ * Interpolates values into a string.
+ * Values to be interpolated into the template are specified as extra arguments.
+ * @type function(!string)
+ * @param {string} template A text in which placeholders are specified using question marks. Ex: "Hello ?, you age is ?."
+ */
 
 //------------------------------------------------------------------------------
 
@@ -93,7 +100,8 @@
         if (map.hasOwnProperty (k) && map[k])
           c.push (k);
       return c.join (sep === undefined ? ' ' : '');
-    }
+    },
+    sprintf: sprintf
   };
 
   var macros = [
@@ -126,7 +134,10 @@
 
   /* Export public API */
   _export.render = render;
-  _export.renderString = renderString;
+  _export.renderFile = renderFile;
+  _export.renderTemplate = renderFile;
+  _export.precompile = precompile;
+  _export.compile = compile;
   _export.config = config;
   _export.API = API;
   _export.macros = macros;
@@ -137,8 +148,12 @@
   /** @type {RegExp} */
   var MATCH_EXP;
 
+  // Initialize with default options.
+  config ();
+
   /**
    * Sets default options for the template engine.
+   * @public
    * @param {Options?} opt Global options you may share between templates.
    */
   function config (opt)
@@ -152,25 +167,21 @@
 
   /**
    * Renders a template from the specified file.
+   * @public
    * @param {string} url An URL (relative or absolute) or a file path (if running on Node.js).
    * @param {Object|null} data Data to make available to the template's embedded script.
-   * @param {function(Object,string)} callback A Node.js-style callback  with parameters (err, data)
+   * @param {function(Object,string?)} callback A Node.js-style callback  with parameters (err, data)
    * that will receive the rendered template as an HTML string.
    */
-  function render (url, data, callback)
+  function renderFile (url, data, callback)
   {
-    // If the user has not call config(), call it now with default options.
-    if (!MATCH_EXP) config ();
-
-    data = data || {};
-
     load (url, function (err, template)
     {
       if (err) callback (err);
       else {
         var compiled = getCompiled (url, template);
         try {
-          callback (null, compiled (data, options.context, API));
+          callback (null, compiled (data || {}, options.context, API));
         }
         catch (err) {
           callback (err);
@@ -180,23 +191,57 @@
   }
 
   /**
-   * Renders a template from the specified file.
-   * @param {string} template The template an an HTML string.
+   * Renders a template from the specified string.
+   * @public
+   * @param {string} template The template as an an HTML string.
    * @param {Object?} data Data to make available to the template's embedded script.
-   * @param {string?} cacheKey An unique name used for caching the compiled template.
-   * If none is specified, the template will be recompiled every time it is rendered.
+   * Note: the template will be recompiled every time it is rendered.
    */
-  function renderString (template, data, cacheKey)
+  function render (template, data)
   {
-    // If the user has not call config(), call it now with default options.
-    if (!MATCH_EXP) config ();
-
-    data = data || {};
-
-    var compiled = cacheKey ? getCompiled (cacheKey, template) : compile (template);
-    return compiled (data, options.context, API);
+    return compile (template) (data || {});
   }
 
+  /**
+   * Renders a template from the specified string.
+   * @public
+   * @param {string?} name An unique name used for caching the compiled template.
+   * @param {Object?} data Data to make available to the template's embedded script.
+   */
+  function renderTemplate (name, data)
+  {
+    var compiled = cache[name];
+    if (!compiled)
+      throw new Error (sprintf ('Template ? not found', name));
+    return compiled (data || {});
+  }
+
+  /**
+   * Compiles and caches a template for late use with renderTemplate().
+   * @public
+   * @param {string} name An unique name used for caching the compiled template.
+   * @param {string} template The template an an HTML string.
+   */
+  function precompile (name, template)
+  {
+    return cache[name] = compile (template);
+  }
+
+  //------- PRIVATE -----------------------------------------------------------------------------
+
+  /**
+   * Gets the compiled function for the specified template from the cache of, if not cached yet,
+   * compiles it now and caches it.
+   * @param {string} key The cache key.
+   * @param {string} template The template as a string.
+   * @returns {Function}
+   */
+  function getCompiled (key, template)
+  {
+    var fn = cache[key];
+    if (fn) return fn;
+    return cache[key] = compile (template);
+  }
 
   /**
    * Compiles a template into an executable function.
@@ -242,21 +287,6 @@
     return createCompiledTemplate (out.join ('\n'));
   }
 
-  /**
-   * Gets the compiled function for the specified template from the cache of, if not cached yet,
-   * compiles it now and caches it.
-   * @param {string} key The cache key.
-   * @param {string} template The template as a string.
-   * @returns {Function}
-   */
-  function getCompiled (key, template)
-  {
-    var fn = cache[key];
-    if (fn) return fn;
-    return cache[key] = compile (template);
-  }
-
-
   function applyMacros (code)
   {
     for (var i = 0, m = macros.length; i < m; ++i)
@@ -267,7 +297,11 @@
   function createCompiledTemplate (code)
   {
     try {
-      return Function ('scope', 'context', 'API', 'var $o=[];\nwith (API||{}) with (context||{}) with (scope||{}) {\n' + code + '\n}\nreturn $o.join("")');
+      var fn = Function ('scope', 'context', 'API', 'var $o=[];\nwith (API) with (context) with (scope) {\n' + code + '\n}\nreturn $o.join("")');
+      return function (scope)
+      {
+        return fn (scope || {}, options.context, API);
+      }
     }
     catch (err) {
       console.log ("\nCompiled template:\n");
@@ -317,6 +351,12 @@
           o[k] = type[k];
   }
 
+  /**
+   * Interpolates values into a string.
+   * Values to be interpolated into the template are specified as extra arguments.
+   * @type function(!string)
+   * @param {string} str A text in which placeholders are specified using question marks. Ex: "Hello ?, you age is ?."
+   */
   function sprintf (str)
   {
     var i = 1,
