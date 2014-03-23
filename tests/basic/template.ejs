@@ -1,0 +1,15 @@
+<h3>Demo list <%=ord%>:</h3>
+<% if (!items.length) { %><p><i>The list is empty.</i></p><% }
+else for (i in items)
+    if (i.value.length) { %>
+<%== '<h4>' + i.key + '</h4>' %>
+<ul>
+  <% for (f in i.value) { %>
+  <li>
+    <span class="total"><%= f[1] %></span> occurence<%= f[1] != 1 ? 's' : '' %>
+    <input type="checkbox" value="<%= f[0] %>" id="check_<%= f[0] %>">
+    <label for="check_<%= f[0] %>"><%= f[0] %></label>
+  </li>
+  <% } %>
+</ul>
+<% } %>

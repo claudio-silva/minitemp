@@ -1,0 +1,9 @@
+{
+  "name": "ejsplus",
+  "engine": "node 0.8.21",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-uglify": "~0.4.0"
+  }
+}

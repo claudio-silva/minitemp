@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="../../minitemp.js"></script>
+  </head>
+  <style>
+    .total { font-weight: bold }
+    label { color: #C00 }
+  </style>
+  <body>
+    <div id="result"></div>
+    <div id="result2"></div>
+    <div id="result3"></div>
+
+    <script id="demo" type="template">
+      <h3>Demo list <%=ord%>:</h3>
+      <% if (!items.length) { %><p><i>The list is empty.</i></p><% }
+      else for (i in items)
+      if (i.value.length) { %>
+      <%== '<h4>' + i.key + '</h4>' %>
+      <ul>
+        <% for (f in i.value) { %>
+        <li>
+          <span class="total"><%= f[1] %></span> occurence<%= f[1] != 1 ? 's' : '' %>
+          <input type="checkbox" value="<%= f[0] %>" id="check_<%= f[0] %>">
+          <label for="check_<%= f[0] %>"><%= f[0] %></label>
+        </li>
+        <% } %>
+      </ul>
+      <% } %>
+    </script>
+
+    <script>
+      var data = {
+        ord: 1,
+        items: [
+          {
+            key:   "Title 1",
+            value: [
+              ['Item 1', 5],
+              ['Item 2', 3]
+            ]
+          },
+          {
+            key:   "Title 2",
+            value: [
+              ['Item 3', 1],
+              ['Item 4', 0]
+            ]
+          }
+        ]
+      };
+      function $$ (id) { return document.getElementById (id.substr (1)) }
+
+      // Example 1 - Fetch template from external file and use embedded data.
+
+      minitemp.render ('template.ejs', data, function (err, html)
+      {
+        if (err)
+          throw err;
+        $$ ('#result').innerHTML = html;
+      });
+
+      // Example 2 - Fetch data from external file and render embedded template.
+
+      minitemp.load ('test.json', function (err, data2)
+      {
+        var myData = {
+          ord:   2,
+          items: JSON.parse (data2)
+        };
+        var template = $$ ('#demo').innerHTML;
+        $$ ('#result2').innerHTML = minitemp.renderString (template, myData);
+      });
+
+      // Example 3 - Fetch data and template from external files.
+
+      minitemp.load ('test.json', function (err, data3)
+      {
+        var myData = {
+          ord:   3,
+          items: JSON.parse (data3)
+        };
+        minitemp.render ('template.ejs', myData, function (err, html)
+        {
+          if (err)
+            throw err;
+          $$ ('#result3').innerHTML = html;
+        });
+      });
+    </script>
+  </body>
+</html>
