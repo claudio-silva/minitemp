@@ -135,7 +135,7 @@
   /* Export public API */
   _export.render = render;
   _export.renderFile = renderFile;
-  _export.renderTemplate = renderFile;
+  _export.renderTemplate = renderTemplate;
   _export.precompile = precompile;
   _export.compile = compile;
   _export.config = config;
