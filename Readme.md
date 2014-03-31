@@ -4,7 +4,7 @@
 
 This is a variant of the traditional EJS templating system that is compatible with it at the basic syntax level while providing additional features.
 
-It allows your site or application to render templates in the browser (client-side) using an enhanced dialect of JavaScript as the templating language.
+It allows your site or application to render templates in the browser (client-side) or in the server (with Node.js) using an enhanced dialect of JavaScript as the templating language.
 
 Compared to other template systems, this library is very small and lightweight, but it's also very fast and has enough features for most templating needs. Furthermore, it allows you to easily extended it to suit your needs.
 
