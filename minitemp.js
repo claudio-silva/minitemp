@@ -15,6 +15,8 @@
 /**
  * @name ea
  * Escapes an HTML attribute value.
+ * This is faster than e() and generates shorter strings, as it avoids some HTML encodings that are not needed for attributes.
+ * Always use with the <%- %> raw output tags.
  * @type function(string)
  */
 /**
@@ -101,7 +103,7 @@
           c.push (k);
       return c.join (sep === undefined ? ' ' : '');
     },
-    sprintf: sprintf
+    sprintf:  sprintf
   };
 
   var macros = [
@@ -136,12 +138,15 @@
   _export.render = render;
   _export.renderFile = renderFile;
   _export.renderTemplate = renderTemplate;
-  _export.precompile = precompile;
+  _export.defineTemplate = defineTemplate;
   _export.compile = compile;
   _export.config = config;
   _export.API = API;
   _export.macros = macros;
   _export.load = load;
+
+  if (typeof jQuery != 'undefined')
+    registerPlugin ();
 
   /** @type {Options} */
   var options;
@@ -181,7 +186,7 @@
       else {
         var compiled = getCompiled (url, template);
         try {
-          callback (null, compiled (data || {}, options.context, API));
+          callback (null, compiled (data));
         }
         catch (err) {
           callback (err);
@@ -213,16 +218,16 @@
     var compiled = cache[name];
     if (!compiled)
       throw new Error (sprintf ('Template ? not found', name));
-    return compiled (data || {});
+    return compiled (data);
   }
 
   /**
-   * Compiles and caches a template for late use with renderTemplate().
+   * Compiles and caches a template for later use with renderTemplate().
    * @public
    * @param {string} name An unique name used for caching the compiled template.
    * @param {string} template The template an an HTML string.
    */
-  function precompile (name, template)
+  function defineTemplate (name, template)
   {
     return cache[name] = compile (template);
   }
@@ -362,6 +367,56 @@
     var i = 1,
       args = arguments;
     return typeof str == 'string' ? str.replace (/\?/g, function () { return args[i++] }) : '';
+  }
+
+  /**
+   * Registers the jQuery plugin if jQuery is available.
+   */
+  function registerPlugin ()
+  {
+    var $ = jQuery; // global $ may be something else.
+
+    $.fn.render = function (src, data)
+    {
+      var compiled, id;
+
+      switch (src[0]) {
+
+        case '#':
+        case '.':
+
+          // Render from embedded template selected via CSS #id or .class selector.
+
+          id = src.substr (1);
+          compiled = cache[id];
+          // getCompiled() is not used to avoid re-fetching the template if it's already compiled.
+          if (!compiled)
+            compiled = cache[id] = compile ($ (src).html ());
+          this.html (compiled (data));
+          break;
+
+        case '@':
+
+          //Render from precompiled template with the specified name prefixed by @.
+
+          this.html (renderTemplate (src.substr (1), data));
+          break;
+
+        default:
+
+          // Render from the file at the specified URL.
+
+          var self = this;
+
+          renderFile (src, data, function (err, html)
+          {
+            if (err) throw err;
+            self.html (html);
+          });
+
+      }
+      return this;
+    };
   }
 
 }) ();
