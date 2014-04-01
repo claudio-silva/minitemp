@@ -1,6 +1,6 @@
 {
   "name": "minitemp",
-  "version": "0.2.1",
+  "version": "2.1.0",
   "engine": "node 0.8.21",
   "dependencies": {},
   "devDependencies": {
