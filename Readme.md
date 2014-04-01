@@ -459,7 +459,7 @@ Now, whenever you need to rebuild the library, simply type `grunt`.
 
  Version | Date       | Description
 ---------|------------|---------------------------------
- v2.1.0  | 2014-04-01 | Universal Module Loader support.
+ v2.1.1  | 2014-04-01 | Universal Module Loader support.
  v2.0.0  | 2014-03-31 | jQuery plugin. API-breaking changes.
  v1.0.0  | 2014-03-23 | Initial release.
 
