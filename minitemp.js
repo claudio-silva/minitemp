@@ -5,6 +5,7 @@
 
 //------------------------------------------------------------------------------
 // Pseudoglobal utility functions for use on templates.
+// This JSDoc block is useful for IDE code analysis.
 //------------------------------------------------------------------------------
 
 /**
@@ -55,13 +56,29 @@
 
 //------------------------------------------------------------------------------
 
-(function ()
+/**
+ * Universal Module Loader
+ */
+(function (root, factory)
+{
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define ([], factory);
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but only CommonJS-like
+    // environments that support module.exports, like Node.
+    module.exports = factory ();
+  } else {
+    // Browser globals (root is window).
+    root.minitemp = factory ();
+  }
+}) (this, function ()
 {
   /**
    * True if the script is running under Node.js.
    * @type {boolean}
    */
-  var isModeJS = typeof(process) != 'undefined' && process.title == 'node';
+  var isModeJS = typeof process != 'undefined' && process.title == 'node';
 
   var cache = {};
   var entityMap = {
@@ -132,19 +149,6 @@
     context: {}
   };
 
-  var _export = isModeJS ? module.exports : window.minitemp = {};
-
-  /* Export public API */
-  _export.render = render;
-  _export.renderFile = renderFile;
-  _export.renderTemplate = renderTemplate;
-  _export.defineTemplate = defineTemplate;
-  _export.compile = compile;
-  _export.config = config;
-  _export.API = API;
-  _export.macros = macros;
-  _export.load = load;
-
   if (typeof jQuery != 'undefined')
     registerPlugin ();
 
@@ -155,6 +159,19 @@
 
   // Initialize with default options.
   config ();
+
+  /** Export public API */
+  return {
+    render:         render,
+    renderFile:     renderFile,
+    renderTemplate: renderTemplate,
+    defineTemplate: defineTemplate,
+    compile:        compile,
+    config:         config,
+    API:            API,
+    macros:         macros,
+    load:           load
+  };
 
   /**
    * Sets default options for the template engine.
@@ -419,4 +436,4 @@
     };
   }
 
-}) ();
+});

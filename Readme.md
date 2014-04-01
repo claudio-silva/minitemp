@@ -1,27 +1,33 @@
 # minitemp
 
-##### Javascript Mini Template Engine
+##### Tiny, Fast and Flexible Template Engine, using Embedded Javascript.
 
 This is a variant of the traditional EJS templating system that is compatible with it at the basic syntax level while providing additional features.
 
 It allows your site or application to render templates in the browser (client-side) or in the server (with Node.js) using an enhanced dialect of JavaScript as the templating language.
 
-Compared to other template systems, this library is very small and lightweight, but it's also very fast and has enough features for most templating needs. Furthermore, it allows you to easily extended it to suit your needs.
+Compared to other template systems, this library is very small and lightweight, but it's also very fast and has enough features for most templating needs. Furthermore, it allows you to easily extended it to suit your own needs.
 
 ### Features
 
-- It is compatible with EJS syntax.
+##### Feature highlights
+
+- It's TINY! (~3Kb minified; ~2Kb with gzip compression).
+- It's FAST! It compiles templates to pure javascript and automatically caches them.
+- It's compatible with the EJS syntax.
 - It has no dependencies.
-- But it can use jQuery, if available, providing a plugin that simplifies usage even further.
+- Provides a jQuery plugin (if jQuery is available).
 - Runs in the browser or in the server (Node.js).
-- It's tiny (~3Kb minified; ~1.9Kb with gzip compression).
-- It's FAST! It compiles templates to pure javascript and automatically caches them (if possible).
-- The start and end tags can be configured (ex. you may use `{{ }}` instead of `<% %>`).
-- Outputs raw HTML (if explicitly stated) or secure escaped strings, protecting your app from code injection attacks or undesirable HTML formatting embedded in user-provided content.
-- Supports macros that allow javascript language extensions.
-- Supports *contexts*, which function as global scopes for code running inside templates. They allow sharing data and functions between templates without touching the browser's global scope.
-- It has an integrated API of utility/helper functions for use on your templates.
+- Supports AMD, CommonJS and browser globals.
 - It's extensible! - add your own templating helper functions and language extensions (macros).
+
+##### Other features
+
+- Supports *macros*, which allow javascript language extensions.
+- Supports *contexts*, which function as global scopes for code running inside templates. They allow sharing data and functions between templates without touching the browser's global scope.
+- It has a small built-in API of utility/helper functions that you can use on your templates.
+- It can output both raw HTML (if explicitly stated) or secure escaped strings, which protect your app from code injection attacks or undesirable HTML formatting embedded in user-provided content.
+- The start and end tags can be configured (ex. use `{{ }}` instead of `<% %>`).
 
 ## EJS Syntax
 
@@ -45,15 +51,15 @@ Don't do this:
 
 > While omitting curly brackets may work sometimes, it's risky. Always use them to enclose blocks in conditions, loops and other javascript control flow structures.
 
-Expressions are ignored:
+Expressions are ignored. For example, the following will be evaluated as a statement and its value discarded:
 
 ```
 <div><% 'Hello' %></div>
 ```
 
-This will be evaluated as a statement.
 
-#### Escaped output from javascript
+
+#### Output safe (HTML encoded) text from javascript
 
 `<%=` javascript expression `%>`
 
@@ -64,7 +70,7 @@ This will be evaluated as a statement.
 <div><%= person.isNice ? "Thank your for coming" : "" %></div>
 ```
 
-#### Unescaped (raw) output from javascript
+#### Output raw HTML from javascript
 
 `<%==` javascript expression `%>`  
 or  
@@ -94,27 +100,51 @@ These comments will not generate any output.
 
 #### Installing with [bower](http://github.com/bower/bower)
 
+You can use Bower for installing the librar for client-side use.
+
     $ bower install minitemp
+    
+#### Installing with [npm](https://www.npmjs.org/)
+
+You can use npm for installing the library for server-side use.
+
+    $ npm install minitemp
     
 #### Installing manually
   
 Download the source code and copy the `minitemp.min.js` file into your project.
 
---
-#### Loading the script client-side
+---
+#### Loading the script
 
-You can load the script directly with a `<script>` tag or you may use a script loader (ex. Require.js, Browserify, etc.).
+##### Client-side - as a global script
 
-#### Loading the script server-side
+You can load the script directly with a `<script>` tag or you may use a script loader.
 
-    var minitemp = require('minitemp');
-    
+The minitemp API will be available as a global `minitemp` object.
+
+##### Client-side - as an AMD module
+
+```javascript
+define (['minitemp'], function (minitemp) {
+  // your code here});
+```
+
+##### Client-side or Server-side - as a CommonJS module
+
+```javascript
+var minitemp = require('minitemp');
+```
+
+> You can load the library as a CommonJS module either client-side (using Browserify or any other CommonJS loader) or server-side (in Node.js).
 
 ## Using the jQuery plugin, client-side
 
 Syntax:
 
-    $ (target).render (source, data)
+```javascript
+$ (target).render (source, data)
+```
     
 - `data` is an optional object who's content will be available as pseudo-global variables for javascript code running in the template.
 - The target selector supports any CSS selector.
@@ -127,7 +157,7 @@ You may specify a relative or absolute URL for the source.
 
 ###### Example
 
-```
+```javascript
 $ ('#targetElement').render ('fileUrl.ejs', data);
 ```
 
@@ -137,16 +167,20 @@ The source template expression supports only a single id (ex: `'#id'`) or class 
 
 ###### Example
 
-    $ ('#targetElement').render ('#sourceTemplate', data);
+```javascript
+$ ('#targetElement').render ('#sourceTemplate', data);
+```
 
 or
 
-    $ ('#targetElement').render ('.sourceTemplate', data);
+```javascript
+$ ('#targetElement').render ('.sourceTemplate', data);
+```
 
 #### Rendering from a precompiled string template
 
 To render a named template, specify the template name prefixed by `@` as the source expression.
-```
+```javascript
 // On startup
 minitemp.defineTemplate ('templateName', templateStr);
 
@@ -157,9 +191,9 @@ $ ('#targetElement').render ('@templateName', data);
 
 ## Using minitemp without jQuery, client-side
 
-#### Rendering a string template without caching
+#### Rendering a string template
 
-```
+```javascript
 var template = '<p>Hello <%=name %>, how are you?</p>';
 var html = minitemp.render (template, data);
 // Do something with the resulting html.
@@ -167,7 +201,7 @@ var html = minitemp.render (template, data);
 
 #### Rendering from an external template into a DOM element
 
-```
+```javascript
 minitemp.renderFile (url, data, function (err, html) {
 	if (err) throw err;
 	document.getElementById('target').innerHTML = html;
@@ -176,7 +210,7 @@ minitemp.renderFile (url, data, function (err, html) {
 
 #### Rendering from a template embedded in a DOM element into another DOM element, with caching
 
-```
+```javascript
 // On startup:
 
 // Get the template's HTML.
@@ -198,7 +232,7 @@ Minitemp provides a `load` function, which you can use to load template files wi
 
 ###### Example
 
-```
+```javascript
 minitemp.load (url, function (err, template)
 {
   if (err) throw (err);
@@ -210,6 +244,19 @@ minitemp.load (url, function (err, template)
 
 > This same function can also be used server-side. It either uses `XMLHttpRequest` on the browser or the Node.js API on the server.
 
+#### Compiling templates
+
+You can convert an HTML template into an optimized javascript function, which can be used for directly rendering the template whenever you want.
+
+```javascript
+var compiled = minitemp.compile (template);
+```
+
+To render it, call:
+
+```javascript
+var html = compiled (data);
+```
 
 ## Using minitemp on the server, with Node.js
 
@@ -217,7 +264,7 @@ You can render templates into HTML strings, which can then be sent to the browse
 
 #### Example using the Express 4 framework
 
-```
+```javascript
 app.route('/dogs')
 
   .get (function (req, res, next)
@@ -228,13 +275,13 @@ app.route('/dogs')
 	    if (err) throw err;
 	    else res.send (html);
 	  });
-  })
+  });
 
 ```
 
-#### Rendering a string template without caching
+#### Rendering a string template
 
-```
+```javascript
 var template = '<p>Hello <%=name %>, how are you?</p>';
 var html = minitemp.render (template, data);
 // Send the resulting html to the browser.
@@ -242,16 +289,16 @@ var html = minitemp.render (template, data);
 
 #### Rendering from an external template
 
-```
+```javascript
 minitemp.renderFile (url, data, function (err, html) {
 	if (err) handle_the_error();
 	else do_something(); // Send the resulting html to the browser.
 });
 ```
 
-#### Rendering from embedded templates, with caching
+#### Rendering from embedded templates
 
-```
+```javascript
 // On startup:
 
  // Precompile the template.
@@ -269,7 +316,9 @@ var html = minitemp.renderTemplate('templateName', data);
 
 At any time, you may specify one or more options for configuring the minitemp engine.
 
-    minitemp.options (options);
+```javascript
+minitemp.options (options);
+```
     
 ### Available options
 
@@ -290,14 +339,14 @@ By setting the same context for multiple instances of MinTemp, you can share dat
 
 Minitemp provides several utility functions that can be called inside your templates.
 
-##### e (string)
+#### `e` (string)
 
 Escapes an HTML fragment. Equivalent to `<%= string =%>`.
 
-##### ea (string)
+#### `ea` (string)
 
 Escapes an HTML attribute value.  
-This is faster than e() and generates shorter strings, as it avoids some HTML encodings that are not needed for attributes.  
+This is faster than `e()` and generates shorter strings, as it avoids some HTML encodings that are not needed for attributes.  
 Always use with the `<%- %>` raw output tags.
 
 ###### Example:
@@ -306,7 +355,8 @@ Always use with the `<%- %>` raw output tags.
 <div title="<%- ea(title) %>">Hello</div>
 ```
 
-##### attr (name:string, value:any[, args:Array][, defaultValue:any])
+#### `attr` (name:string, value:any[, args:Array][, defaultValue:any])
+
 ```
 @param {string} name        Attribute name.
 @param {*}      value       Attribute value.
@@ -322,21 +372,21 @@ arguments to be injected into the attribute value.
 
 ###### Example:
 	
-```html
+```
 <div <%- attr ('onclick', info && 'showDetail(?,?)', [id, price]) %>> Click me! </div>
 ```
 
-##### showIf (condition:boolean)
+#### `showIf` (condition:boolean)
 
 If the condition expression is false, it hides the element where this expression lies by outputting a `style="display:none"` attribute.
 
 ###### Example:
 	
-```html
+```
 <div <%- showIf (isSenior (my.age)) %> class="warning">You are old.</div>
 ```
 
-##### dynalist (map:Object, separator:string)
+#### `dynalist` (map:Object, separator:string)
 
 ```
 @param {Object.<string,boolean>} map        A map of strings to boolean values.
@@ -348,7 +398,7 @@ It can be used, for instance, to generate dynamic CSS class lists.
 
 ###### Example:
 	
-```html
+```
 <div class="header <%= dynalist ({active: isActive, first: isFirst()})">
 ```
 
@@ -360,7 +410,9 @@ Minitemp comes with a single built-in macro: the `for (var in array)` statement.
 
 Unlike the standard javascript `for (v in a)` statement, when this macro is used inside a template, it is converted into an array looping construct like this:
 
-    for (var i = 0, m = a.length, v; v = a[i], i < m; ++i)
+```javascript
+for (var i = 0, m = a.length, v; v = a[i], i < m; ++i)
+```
     
 The generated code is very similar to what you would have to manually write on each loop of your templates, so the macro saves you time and the syntax is shorter and more readable.
 
@@ -383,7 +435,7 @@ var output = minitemp.render ('<p><%= isset(name) ? 'Hello ' + name : '' %></p>'
 
 Additional examples are available on the `tests` folder.
 
-## Rebuilding the library
+## How to build the library
 
 If you make changes to the source code, you may rebuild the minified javascript file using [Grunt](http://gruntjs.com).
 
@@ -396,9 +448,10 @@ Now, whenever you need to rebuild the library, simply type `grunt`.
 ## History
 
  Version | Date       | Description
----------|------------|----------------------------
+---------|------------|---------------------------------
+ v0.2.1  | 2014-04-01 | Universal Module Loader support.
+ v0.2.0  | 2014-03-31 | jQuery plugin.
  v0.1.0  | 2014-03-23 | Initial release.
- v0.2.0  | 2014-03-31 | Added an optional jQuery plugin.
 
 ## License
 
