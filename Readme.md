@@ -151,9 +151,9 @@ $ (target).render (source, data)
 - There are three syntaxes for the source expression, which allows selecting from three types of template sources. See below.
 - Minitemp compiles and caches the templates using the source expression as a cache key.
 
-#### Rendering from an external template
+#### Rendering an external template
 
-You may specify a relative or absolute URL for the source.
+Specify the relative or absolute URL of the template file as the source argument.
 
 ###### Example
 
@@ -161,7 +161,7 @@ You may specify a relative or absolute URL for the source.
 $ ('#targetElement').render ('fileUrl.ejs', data);
 ```
 
-#### Rendering from an embedded template
+#### Rendering a template embedded in a DOM element
 
 The source template expression supports only a single id (ex: `'#id'`) or class (ex: `'.class'`) CSS selector.
 
@@ -177,7 +177,7 @@ or
 $ ('#targetElement').render ('.sourceTemplate', data);
 ```
 
-#### Rendering from a precompiled string template
+#### Rendering a precompiled string template
 
 To render a named template, specify the template name prefixed by `@` as the source expression.
 ```javascript
@@ -199,7 +199,9 @@ var html = minitemp.render (template, data);
 // Do something with the resulting html.
 ```
 
-#### Rendering from an external template into a DOM element
+> Warning: when directly rendering string templates, the resulting compiled templates are not cached, as there is no key to save/retrieve them from the cache. Therefore, performance will be lower.
+
+#### Rendering an external template into a DOM element
 
 ```javascript
 minitemp.renderFile (url, data, function (err, html) {
@@ -208,7 +210,7 @@ minitemp.renderFile (url, data, function (err, html) {
 });
 ```
 
-#### Rendering from a template embedded in a DOM element into another DOM element, with caching
+#### Rendering a template embedded in a DOM element into another DOM element
 
 ```javascript
 // On startup:
@@ -246,7 +248,7 @@ minitemp.load (url, function (err, template)
 
 #### Compiling templates
 
-You can convert an HTML template into an optimized javascript function, which can be used for directly rendering the template whenever you want.
+You can convert an HTML template into an optimized javascript function, which can be used for directly rendering the template.
 
 ```javascript
 var compiled = minitemp.compile (template);
@@ -287,7 +289,9 @@ var html = minitemp.render (template, data);
 // Send the resulting html to the browser.
 ```
 
-#### Rendering from an external template
+> Warning: when directly rendering string templates, the resulting compiled templates are not cached, as there is no key to save/retrieve them from the cache. Therefore, performance will be lower.
+
+#### Rendering an external template
 
 ```javascript
 minitemp.renderFile (url, data, function (err, html) {
@@ -296,7 +300,7 @@ minitemp.renderFile (url, data, function (err, html) {
 });
 ```
 
-#### Rendering from embedded templates
+#### Rendering a precompiled template
 
 ```javascript
 // On startup:
@@ -414,9 +418,13 @@ Unlike the standard javascript `for (v in a)` statement, when this macro is used
 for (var i = 0, m = a.length, v; v = a[i], i < m; ++i)
 ```
     
-The generated code is very similar to what you would have to manually write on each loop of your templates, so the macro saves you time and the syntax is shorter and more readable.
+The generated code is very similar to what you would have to manually write on each loop of your templates, but the macro is shorter and more readable.
 
 > This macro implements functionality similar to the proposed ES6 `for (v of a)` statement, but it uses current javascript syntax. This way, an IDE (like WebStorm with the EJS plugin) doesn't display any syntax error warnings on those statements.
+
+#### Macros limitations
+
+Macros can only be applied to javascript source code inside tagged blocks. They cannot span multiple blocks or target the HTML code.
 
 #### Defining your own macros
 
@@ -426,9 +434,11 @@ To add your own application-specific macros to the minitemp engine, push them in
 
 ###### Example:
 
+An example macro for an `ifSet (variable) stringExp;` construct:
+
 ```javascript
-minitemp.macros.push([ /isset\s*\((.*?)\)/g, '$1 in data' ]);
-var output = minitemp.render ('<p><%= isset(name) ? 'Hello ' + name : '' %></p>', {name: 'John'});
+minitemp.macros.push([/ifSet\s*\((.*?)\)(.*?);/g, 'typeof $1 != "undefined" ? $2 : ""']);
+var output = minitemp.render ('<p><%= ifSet(name) 'Hello ' + name; %></p>', {name: 'John'});
 ```
 
 ## More examples
