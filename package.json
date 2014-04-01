@@ -1,6 +1,21 @@
 {
   "name": "minitemp",
+  "description": "Tiny, Fast and Flexible Template Engine, using Embedded Javascript.",
   "version": "2.1.0",
+  "homepage": "https://github.com/claudio-silva/minitemp",
+  "author": {
+    "name": "Cláudio Silva",
+    "email": "claudio.silva@impactwave.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudio-silva/minitemp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/claudio-silva/minitemp/issues"
+  },
+  "license": "MIT",
+  "main": "minitemp.js",
   "engine": "node 0.8.21",
   "dependencies": {},
   "devDependencies": {
