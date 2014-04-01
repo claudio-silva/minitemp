@@ -434,11 +434,11 @@ To add your own application-specific macros to the minitemp engine, push them in
 
 ###### Example:
 
-An example macro for an `ifSet (variable) stringExp;` construct:
+An example macro for an `ifSet (variable) stringExp` construct, which outputs a string only if the specified variable is defined:
 
 ```javascript
-minitemp.macros.push([/ifSet\s*\((.*?)\)(.*?);/g, 'typeof $1 != "undefined" ? $2 : ""']);
-var output = minitemp.render ('<p><%= ifSet(name) 'Hello ' + name; %></p>', {name: 'John'});
+minitemp.macros.push([/ifSet\s*\((.*?)\)(.*)/g, 'typeof $1 != "undefined" ? $2 : ""']);
+var output = minitemp.render ('<p><%= ifSet(name) 'Hello ' + name %></p>', {name: 'John'});
 ```
 
 ## More examples
@@ -459,9 +459,9 @@ Now, whenever you need to rebuild the library, simply type `grunt`.
 
  Version | Date       | Description
 ---------|------------|---------------------------------
- v0.2.1  | 2014-04-01 | Universal Module Loader support.
- v0.2.0  | 2014-03-31 | jQuery plugin.
- v0.1.0  | 2014-03-23 | Initial release.
+ v2.1.0  | 2014-04-01 | Universal Module Loader support.
+ v2.0.0  | 2014-03-31 | jQuery plugin. API-breaking changes.
+ v1.0.0  | 2014-03-23 | Initial release.
 
 ## License
 
